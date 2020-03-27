@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="GameHost">
+    <Position X="9.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAACAAAAIBABAAAAAAAAAAAAAAAAEAAAAAEAA=</HashCode>
+      <FileName>Assets\Scripts\GameHost.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameManager">
+    <Position X="8" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAQCAAAAQAQBEAEAAAAAAAABAAIADwQAAAAUA=</HashCode>
+      <FileName>Assets\Scripts\GameManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="JoinGame">
+    <Position X="11.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAIAAAAAAgAAgCAAAAAAAjEACAEAAAA=</HashCode>
+      <FileName>Assets\Scripts\JoinGame.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MatchSettings">
+    <Position X="19" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Assets\Scripts\MatchSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PauseMenu">
+    <Position X="15" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAGAAAAIAAAABAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\PauseMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Player">
+    <Position X="11.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAQACAAIUCAAAACgAAACEABABBAEAAAAAAAABBCAAAA=</HashCode>
+      <FileName>Assets\Scripts\Player.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerController">
+    <Position X="15.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAQAgAAAACAQAAIAAAAAAAAABDAAAQAA0ACAAAAIBAA=</HashCode>
+      <FileName>Assets\Scripts\PlayerController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerMotor">
+    <Position X="13.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQChAAAAqEAAAAAAACAQAAAFAAEAAAAAAQAACCQAAA=</HashCode>
+      <FileName>Assets\Scripts\PlayerMotor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerSetup">
+    <Position X="10" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAQAAAACAAkAAAABAACAEACAAAAAAIAAiAABAAAAA=</HashCode>
+      <FileName>Assets\Scripts\PlayerSetup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerUI">
+    <Position X="17" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IQQAAABAACAAABAAAAIAAAAAAAABAAABAABgAAQAAEA=</HashCode>
+      <FileName>Assets\Scripts\PlayerUI.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Projectile">
+    <Position X="1.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAIAAAAAAAAAAAAAAAAAIAQEAAAAQ=</HashCode>
+      <FileName>Assets\Scripts\Projectile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RoomListItem">
+    <Position X="13.25" Y="2" Width="1.5" />
+    <NestedTypes>
+      <Delegate Name="RoomListItem.JoinRoomDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\RoomListItem.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>BAQAAAAAACAAAAgAAAAAAAAAgAAAAAAAAAACAAAAAAI=</HashCode>
+      <FileName>Assets\Scripts\RoomListItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Shooter">
+    <Position X="8.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQIAAAIASAABIAAAAJAQBAIAAAAAAAAAAQQAUAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Shooter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Turret">
+    <Position X="3.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEQAAAEABCIABIBAAAAFCAAAAIAQEAgAIgBYAAADAAA=</HashCode>
+      <FileName>Assets\Scripts\Turret.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Weapon">
+    <Position X="19" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAIIAgAAAAAAAAAAAAAIEABIAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Weapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WeaponGraphics">
+    <Position X="4.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACQAAACAAAAAAAAAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\WeaponGraphics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WeaponManager">
+    <Position X="6.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KAQAAAAAICAAAIAAAAAABACAAIAAkAgAiAAABAAAAAg=</HashCode>
+      <FileName>Assets\Scripts\WeaponManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WeaponSoundFx">
+    <Position X="3" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAYACAAAgCAAAAIAgAAAAAAAAAAAEAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\WeaponSoundFx.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TurretController">
+    <Position X="5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAEAAAAAAAJAAAAAAAAAgAAACAAAAAAAAIAACAAAA=</HashCode>
+      <FileName>Assets\WarZone\Scripts\TurretController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnityEngine.Networking.NetworkBehaviour" Collapsed="true">
+    <Position X="8.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="UnityEngine.MonoBehaviour" Collapsed="true">
+    <Position X="8" Y="0.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
