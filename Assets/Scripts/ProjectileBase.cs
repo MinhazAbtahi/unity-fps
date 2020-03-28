@@ -2,6 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ProjectileType
+{
+    Standard,
+    Seeker,
+    Cluster
+}
+
+public enum DamageType
+{
+    Direct,
+    Explosion
+}
+
 public class ProjectileBase: MonoBehaviour
 {
 
