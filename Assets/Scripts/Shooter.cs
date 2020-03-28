@@ -20,7 +20,6 @@ public class Shooter : NetworkBehaviour
     [SerializeField]
     private LayerMask layerMask;
 
-
     #endregion
 
     #region Mono/NetworkBehaviour
@@ -39,7 +38,7 @@ public class Shooter : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (PauseMenu.isOn)
+        if (PauseMenu.isOn || !weaponManager.isEquiped)
         {
             return;
         }
@@ -66,14 +65,27 @@ public class Shooter : NetworkBehaviour
         }
         else
         {
-            if (Input.GetButtonDown("Fire1"))
+            switch (this.currentWeapon.weaponType)
             {
-                InvokeRepeating("Shoot", 0f, 1f / currentWeapon.fireRate);
-            }
-            else if (Input.GetButtonUp("Fire1"))
-            {
-                CancelInvoke("Shoot");
-                weaponGraphics.weaponAnimator.StopPlayback();
+                case WeaponType.Automatic:
+                    if (Input.GetButtonDown("Fire1"))
+                    {
+                        InvokeRepeating("Shoot", 0f, 1f / currentWeapon.fireRate);
+                    }
+                    else if (Input.GetButtonUp("Fire1"))
+                    {
+                        CancelInvoke("Shoot");
+                        weaponGraphics.weaponAnimator.StopPlayback();
+                    }
+                    break;
+                case WeaponType.Burst:
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        this.Shoot();
+                    }
+                    break;
+                default:
+                    break;
             }
         }
     }

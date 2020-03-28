@@ -19,6 +19,7 @@ public class WeaponManager : MonoBehaviour
     [SerializeField]
     private Transform weaponHolder;
 
+    public bool isEquiped = false;
     public bool isReloading = false;
     private AudioSource audioSource;
 
@@ -45,7 +46,6 @@ public class WeaponManager : MonoBehaviour
     {
         GameObject currentWeaponClone = Instantiate(selectedWeapon.weaponGraphics, weaponHolder.position, weaponHolder.rotation) as GameObject;
         currentWeaponClone.transform.SetParent(this.weaponHolder);
-        EquipWeapon(selectedWeapon, currentWeaponClone);
         weaponsGraphicsList.Add(currentWeaponClone.GetComponent<WeaponGraphics>());
     }
 
@@ -64,6 +64,7 @@ public class WeaponManager : MonoBehaviour
     /// <param name="selectedWeapon"></param>
     private void EquipWeapon(Weapon selectedWeapon, GameObject selectedWeaponClone)
     {
+        this.isEquiped = true;
         this.currentWeapon = selectedWeapon;
 
         // Weapon graphics
@@ -75,6 +76,7 @@ public class WeaponManager : MonoBehaviour
 
         // Weapon SoundFx
         this.currentWeaponSoundFx = selectedWeaponClone.GetComponent<WeaponSoundFx>();
+        //this.currentWeaponSoundFx.PlaySoundFx(currentWeaponSoundFx.CockSoundFx, 1f);
         if (!currentWeaponSoundFx)
         {
             Debug.LogError("WeapponSoundFx component is missing on the Weapon : " + selectedWeaponClone.gameObject.name);
@@ -131,6 +133,11 @@ public class WeaponManager : MonoBehaviour
     public WeaponSoundFx GetCurrentWeaponSoundFx()
     {
         return this.currentWeaponSoundFx;
+    }
+
+    public void SwitchWeapon()
+    {
+        this.currentWeaponSoundFx.PlaySoundFx(currentWeaponSoundFx.CockSoundFx, 1f);
     }
 
     public void Reload()
