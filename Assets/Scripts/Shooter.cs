@@ -148,11 +148,11 @@ public class Shooter : NetworkBehaviour
             }
 
             // Calls on the server for each weapon hit impact
-            CmdOnCartidgeEjecetEffect();
-
-            // Calls on the server for each weapon hit impact
             CmdOnHitImpact(hitInfo.point, hitInfo.normal);
         }
+
+        // Calls on the server for each CartidgeEjection
+        CmdOnCartidgeEjecetEffect();
 
         if (this.currentWeapon.bullets <= 0)
         {
