@@ -7,6 +7,8 @@ public class WeaponGraphics : MonoBehaviour {
     public readonly int FireAnimID = Animator.StringToHash("Fire");
 
     public Animator weaponAnimator;
+    public GameObject bulletPrefab;
+    public Transform weaponBarrel;
     public ParticleSystem muzzleFlash;
     public ParticleSystem cartidgeEjectEffect;
     public GameObject hitImpactEffect;
@@ -17,6 +19,16 @@ public class WeaponGraphics : MonoBehaviour {
         if (!weaponAnimator)
         {
             weaponAnimator = GetComponent<Animator>();
+        }
+
+        if (!weaponBarrel)
+        {
+            Debug.LogError("WeaponGraphics: WeaponBarrel reference is Missing!");
+        }
+
+        if (!bulletPrefab)
+        {
+            Debug.LogError("WeaponGraphics: BulletPrefab reference is Missing!");
         }
 
         if (!muzzleFlash)

@@ -1,81 +1,64 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
-
-public enum BulletHoleSystem
-{
-    Tag,
-    Material,
-    Physic_Material
-}
-
-
-[System.Serializable]
-public class SmartBulletHoleGroup
-{
-    public string tag;
-    public Material material;
-    public PhysicMaterial physicMaterial;
-    public BulletHolePool bulletHole;
-
-    public SmartBulletHoleGroup()
-    {
-        tag = "Everything";
-        material = null;
-        physicMaterial = null;
-        bulletHole = null;
-    }
-    public SmartBulletHoleGroup(string t, Material m, PhysicMaterial pm, BulletHolePool bh)
-    {
-        tag = t;
-        material = m;
-        physicMaterial = pm;
-        bulletHole = bh;
-    }
-}
-
+using Unity.Entities;
+using Unity.Transforms;
+using Unity.Collections;
 
 [RequireComponent(typeof(WeaponManager))]
-public class Shooter : NetworkBehaviour
+public class Shooter : MonoBehaviour
 {
 
     #region Fields
     private const string PLAYER_TAG = "Player";
 
+    [Header("ECS Bullets: ")]
+    EntityManager manager;
+    GameObjectConversionSettings settings;
+    Entity bulletEntityPrefab;
+
+    [Space(5)]
     [Header("Shooter Settings:")]
+    public bool useECS;
     [SerializeField]
     private Weapon currentWeapon;
+    [SerializeField]
+    private Transform weaponBarrel;
     private WeaponManager weaponManager;
     private WeaponGraphics weaponGraphics;
     [SerializeField]
-    private Camera playerCam;
+    private bool spreadShot;
+    [SerializeField]
+    private int spreadAmount;
+    [SerializeField]
+    private GameObject bulletPrefab;
+    [SerializeField]
+    private Camera playerCamera;
     [SerializeField]
     private LayerMask layerMask;
 
     [Space(5)]
     [Header("BulletHole Settings:")]
-    public bool makeBulletHoles = true;                 // Whether or not bullet holes should be made
-    public BulletHoleSystem bhSystem = BulletHoleSystem.Tag;    // What condition the dynamic bullet holes should be based off
-    public List<string> bulletHolePoolNames = new
-        List<string>();                                 // A list of strings holding the names of bullet hole pools in the scene
-    public List<string> defaultBulletHolePoolNames =
-        new List<string>();                             // A list of strings holding the names of default bullet hole pools in the scene
-    public List<SmartBulletHoleGroup> bulletHoleGroups =
-        new List<SmartBulletHoleGroup>();				// A list of bullet hole groups.  Each one holds a tag for GameObjects that might be hit, as well as a corresponding bullet hole
-    public List<BulletHolePool> defaultBulletHoles =
-        new List<BulletHolePool>();                     // A list of default bullet holes to be instantiated when none of the custom parameters are met
-    public List<SmartBulletHoleGroup> bulletHoleExceptions =
-        new List<SmartBulletHoleGroup>();               // A list of SmartBulletHoleGroup objects that defines conditions for when no bullet hole will be instantiated.
-                                                        // In other words, the bullet holes in the defaultBulletHoles list will be instantiated on any surface except for
-                                                        // the ones specified in this list.
+    public bool makeBulletHoles = true;               
+    public BulletHoleFilter bulletHoleFilter = BulletHoleFilter.Tag; 
+    private List<BulletHoleGroup> bulletHoleGroups = new List<BulletHoleGroup>();
+    public List<BulletHolePool> defaultBulletHoles;
+    private List<BulletHoleGroup> bulletHoleExceptions = new List<BulletHoleGroup>();
+
     #endregion
 
     #region Mono/NetworkBehaviour
     // Use this for initialization
     void Start()
     {
-        if (!playerCam)
+        if (useECS)
+        {
+            manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
+            bulletEntityPrefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(bulletPrefab, settings);
+        }
+
+        if (!playerCamera)
         {
             Debug.LogError("Shooter: Player Camera reference is Missing!");
             this.enabled = false;
@@ -94,6 +77,8 @@ public class Shooter : NetworkBehaviour
 
         this.currentWeapon = this.weaponManager.GetCurrentWeapon();
         this.weaponGraphics = weaponManager.GetCurrentWeaponGraphics();
+        this.weaponBarrel = this.weaponGraphics.weaponBarrel.transform;
+        //this.bulletPrefab = this.weaponGraphics.bulletPrefab;
 
         if (this.currentWeapon.bullets < this.currentWeapon.maxBullets)
         {
@@ -146,7 +131,7 @@ public class Shooter : NetworkBehaviour
     /// </summary>
     private void Shoot()
     {
-        if (!isLocalPlayer || weaponManager.isReloading)
+        if (/*!isLocalPlayer || */weaponManager.isReloading)
         {
             return;
         }
@@ -168,8 +153,8 @@ public class Shooter : NetworkBehaviour
         // Recoil Animation
         weaponGraphics.PlayRecoilAnim();
 
-        Vector3 origin = playerCam.transform.position;
-        Vector3 direction = playerCam.transform.forward;
+        Vector3 origin = playerCamera.transform.position;
+        Vector3 direction = playerCamera.transform.forward;
         float maxDistance = currentWeapon.range;
         RaycastHit hitInfo;
 
@@ -198,7 +183,12 @@ public class Shooter : NetworkBehaviour
 
             // Calls on the server for each weapon hit impact
             CmdOnHitImpact(hitInfo.point, hitInfo.normal);
+            // Creates bullet holes
+            //MakeBulletHoles(hitInfo);
         }
+
+        // Spawns Bullets
+        CmdOnSpawnBullets();
 
         // Calls on the server for each CartidgeEjection
         CmdOnCartidgeEjecetEffect();
@@ -207,6 +197,96 @@ public class Shooter : NetworkBehaviour
         {
             this.weaponManager.Reload();
         }
+    }
+
+    private void CmdOnSpawnBullets()
+    {
+        Vector3 rotation = playerCamera.transform.rotation.eulerAngles;
+        rotation.x = 0f;
+
+        if (useECS)
+        {
+            if (spreadShot)
+                SpawnBulletSpreadECS(rotation);
+            else
+                SpawnBulletECS(rotation);
+        }
+        else
+        {
+            if (spreadShot)
+                SpawnBulletSpread(rotation);
+            else
+                SpawnBullet(rotation);
+        }
+    }
+
+    void SpawnBullet(Vector3 rotation)
+    {
+        GameObject bullet = Instantiate(bulletPrefab) as GameObject;
+
+        bullet.transform.position = weaponBarrel.position;
+        bullet.transform.rotation = Quaternion.Euler(rotation);
+        bullet.SetActive(true);
+    }
+
+    void SpawnBulletSpread(Vector3 rotation)
+    {
+        int max = spreadAmount / 2;
+        int min = -max;
+
+        Vector3 tempRot = rotation;
+        for (int x = min; x < max; x++)
+        {
+            tempRot.x = (rotation.x + 3 * x) % 360;
+
+            for (int y = min; y < max; y++)
+            {
+                tempRot.y = (rotation.y + 3 * y) % 360;
+
+                GameObject bullet = Instantiate(bulletPrefab) as GameObject;
+
+                bullet.transform.position = weaponBarrel.position;
+                bullet.transform.rotation = Quaternion.Euler(tempRot);
+                bullet.SetActive(true);
+            }
+        }
+    }
+
+    void SpawnBulletECS(Vector3 rotation)
+    {
+        Entity bullet = manager.Instantiate(bulletEntityPrefab);
+
+        manager.SetComponentData(bullet, new Translation { Value = weaponBarrel.position });
+        manager.SetComponentData(bullet, new Rotation { Value = Quaternion.Euler(rotation) });
+    }
+
+    void SpawnBulletSpreadECS(Vector3 rotation)
+    {
+        int max = spreadAmount / 2;
+        int min = -max;
+        int totalAmount = spreadAmount * spreadAmount;
+
+        Vector3 tempRot = rotation;
+        int index = 0;
+
+        NativeArray<Entity> bullets = new NativeArray<Entity>(totalAmount, Allocator.TempJob);
+        manager.Instantiate(bulletEntityPrefab, bullets);
+
+        for (int x = min; x < max; x++)
+        {
+            tempRot.x = (rotation.x + 3 * x) % 360;
+
+            for (int y = min; y < max; y++)
+            {
+                tempRot.y = (rotation.y + 3 * y) % 360;
+
+                manager.SetComponentData(bullets[index], new Translation { Value = weaponBarrel.position });
+                manager.SetComponentData(bullets[index], new Rotation { Value = Quaternion.Euler(tempRot) });
+
+                index++;
+            }
+        }
+        bullets.Dispose();
     }
 
     /// <summary>
@@ -219,54 +299,47 @@ public class Shooter : NetworkBehaviour
 
         // Make sure the hit GameObject is not defined as an exception for bullet holes
         bool exception = false;
-        if (bhSystem == BulletHoleSystem.Tag)
+        foreach (BulletHoleGroup bhg in bulletHoleExceptions)
         {
-            foreach (SmartBulletHoleGroup bhg in bulletHoleExceptions)
+            switch (bulletHoleFilter)
             {
-                if (hit.collider.gameObject.tag == bhg.tag)
-                {
-                    exception = true;
-                    break;
-                }
-            }
-        }
-        else if (bhSystem == BulletHoleSystem.Material)
-        {
-            foreach (SmartBulletHoleGroup bhg in bulletHoleExceptions)
-            {
-                MeshRenderer mesh = FindMeshRenderer(hit.collider.gameObject);
-                if (mesh != null)
-                {
-                    if (mesh.sharedMaterial == bhg.material)
+                case BulletHoleFilter.Tag:
+                    if (hit.collider.gameObject.tag == bhg.tag)
                     {
                         exception = true;
-                        break;
                     }
-                }
-            }
-        }
-        else if (bhSystem == BulletHoleSystem.Physic_Material)
-        {
-            foreach (SmartBulletHoleGroup bhg in bulletHoleExceptions)
-            {
-                if (hit.collider.sharedMaterial == bhg.physicMaterial)
-                {
-                    exception = true;
                     break;
-                }
-            }
+                case BulletHoleFilter.Material:
+                    MeshRenderer mesh = FindMeshRenderer(hit.collider.gameObject);
+                    if (mesh != null)
+                    {
+                        if (mesh.sharedMaterial == bhg.material)
+                        {
+                            exception = true;
+                        }
+                    }
+                    break;
+                case BulletHoleFilter.Physic_Material:
+                    if (hit.collider.sharedMaterial == bhg.physicMaterial)
+                    {
+                        exception = true;
+                    }
+                    break;
+                default:
+                    break;
+            }            
         }
-
+     
         // Select the bullet hole pools if there is no exception
         if (makeBulletHoles && !exception)
         {
             // A list of the bullet hole prefabs to choose from
-            List<SmartBulletHoleGroup> holes = new List<SmartBulletHoleGroup>();
+            List<BulletHoleGroup> holes = new List<BulletHoleGroup>();
 
             // Display the bullet hole groups based on tags
-            if (bhSystem == BulletHoleSystem.Tag)
+            if (bulletHoleFilter == BulletHoleFilter.Tag)
             {
-                foreach (SmartBulletHoleGroup bhg in bulletHoleGroups)
+                foreach (BulletHoleGroup bhg in bulletHoleGroups)
                 {
                     if (hit.collider.gameObject.tag == bhg.tag)
                     {
@@ -276,12 +349,12 @@ public class Shooter : NetworkBehaviour
             }
 
             // Display the bullet hole groups based on materials
-            else if (bhSystem == BulletHoleSystem.Material)
+            else if (bulletHoleFilter == BulletHoleFilter.Material)
             {
                 // Get the mesh that was hit, if any
                 MeshRenderer mesh = FindMeshRenderer(hit.collider.gameObject);
 
-                foreach (SmartBulletHoleGroup bhg in bulletHoleGroups)
+                foreach (BulletHoleGroup bhg in bulletHoleGroups)
                 {
                     if (mesh != null)
                     {
@@ -294,9 +367,9 @@ public class Shooter : NetworkBehaviour
             }
 
             // Display the bullet hole groups based on physic materials
-            else if (bhSystem == BulletHoleSystem.Physic_Material)
+            else if (bulletHoleFilter == BulletHoleFilter.Physic_Material)
             {
-                foreach (SmartBulletHoleGroup bhg in bulletHoleGroups)
+                foreach (BulletHoleGroup bhg in bulletHoleGroups)
                 {
                     if (hit.collider.sharedMaterial == bhg.physicMaterial)
                     {
@@ -306,31 +379,31 @@ public class Shooter : NetworkBehaviour
             }
 
 
-            SmartBulletHoleGroup sbhg = null;
+            BulletHoleGroup bulletHoleGroup = null;
 
             // If no bullet holes were specified for this parameter, use the default bullet holes
             if (holes.Count == 0)   // If no usable (for this hit GameObject) bullet holes were found...
             {
-                List<SmartBulletHoleGroup> defaultsToUse = new List<SmartBulletHoleGroup>();
+                List<BulletHoleGroup> defaultsToUse = new List<BulletHoleGroup>();
                 foreach (BulletHolePool h in defaultBulletHoles)
                 {
-                    defaultsToUse.Add(new SmartBulletHoleGroup("Default", null, null, h));
+                    defaultsToUse.Add(new BulletHoleGroup("Default", null, null, h));
                 }
 
                 // Choose a bullet hole at random from the list
-                sbhg = defaultsToUse[Random.Range(0, defaultsToUse.Count)];
+                bulletHoleGroup = defaultsToUse[Random.Range(0, defaultsToUse.Count)];
             }
 
             // Make the actual bullet hole GameObject
             else
             {
                 // Choose a bullet hole at random from the list
-                sbhg = holes[Random.Range(0, holes.Count)];
+                bulletHoleGroup = holes[Random.Range(0, holes.Count)];
             }
 
             // Place the bullet hole in the scene
-            if (sbhg.bulletHole != null)
-                sbhg.bulletHole.PlaceBulletHole(hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
+            if (bulletHoleGroup.bulletHole != null)
+                bulletHoleGroup.bulletHole.PlaceBulletHole(hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
         }
 
     }

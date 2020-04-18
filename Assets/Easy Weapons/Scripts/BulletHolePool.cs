@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[System.Serializable]
+
 public class BulletHolePool : MonoBehaviour
 {
 	public List<GameObject> bulletHoles = new List<GameObject>();			// A list of all the bullet holes in this pool

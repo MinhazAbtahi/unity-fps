@@ -1,11 +1,36 @@
-﻿/// <summary>
-/// BulletHole.cs
-/// Author: MutantGopher
-/// Attach this script to bullet hole prefabs. It handles bullet hole automatic destruction and fading.
-/// </summary>
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
+
+public enum BulletHoleFilter
+{
+    Tag,
+    Material,
+    Physic_Material
+}
+
+[System.Serializable]
+public class BulletHoleGroup
+{
+    public string tag;
+    public Material material;
+    public PhysicMaterial physicMaterial;
+    public BulletHolePool bulletHole;
+
+    public BulletHoleGroup()
+    {
+        tag = "Everything";
+        material = null;
+        physicMaterial = null;
+        bulletHole = null;
+    }
+    public BulletHoleGroup(string t, Material m, PhysicMaterial pm, BulletHolePool bh)
+    {
+        tag = t;
+        material = m;
+        physicMaterial = pm;
+        bulletHole = bh;
+    }
+}
 
 public class BulletHole : MonoBehaviour
 {
@@ -17,7 +42,6 @@ public class BulletHole : MonoBehaviour
 	public float fadeRate = 0.001f;				// The rate at which the bullet will fade out
 	private Color targetColor;					// The color to which the bullet hole wants to change
 	
-
 
 	// Use this for initialization
 	void Start()

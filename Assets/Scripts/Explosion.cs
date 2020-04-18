@@ -13,6 +13,17 @@ public class Explosion : MonoBehaviour
 
     void OnEnable()
     {
+        Explode();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    private void Explode()
+    {
         vibration = FindObjectOfType<Vibration>();
         Vector3 explosionPos = transform.position;
         Collider[] colliders = Physics.OverlapSphere(explosionPos, radius, layerMask);
@@ -28,11 +39,5 @@ public class Explosion : MonoBehaviour
             rb.isKinematic = false;
             rb.AddExplosionForce(power, explosionPos, radius, 3.0F);
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
